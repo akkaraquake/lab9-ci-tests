@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Contact form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 40px auto;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        textarea {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+
+        .error-message {
+            color: #c00;
+            font-size: 0.9em;
+            margin-top: 4px;
+        }
+
+        .alert-success {
+            display: none;
+            padding: 10px;
+            margin-bottom: 16px;
+            border: 1px solid #4caf50;
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        button {
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+
+        .has-error input,
+        .has-error textarea {
+            border: 1px solid #c00;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Contact form</h1>
+
+    <!-- Сообщение об успешной отправке (локатор .alert-success) -->
+    <div class="alert-success">
+        Your message has been sent
+    </div>
+
+    <form id="contact-form" novalidate>
+        <!-- Full Name (required) -->
+        <div class="form-group" id="group-full_name">
+            <label for="full_name">Full Name *</label>
+            <input type="text" id="full_name" name="full_name" />
+            <!-- Ошибка под полем (data-error-for='full_name') -->
+            <div class="error-message" data-error-for="full_name"></div>
+        </div>
+
+        <!-- Email (required, формат) -->
+        <div class="form-group" id="group-email">
+            <label for="email">Email *</label>
+            <input type="email" id="email" name="email" />
+            <div class="error-message" data-error-for="email"></div>
+        </div>
+
+        <!-- Phone (optional) -->
+        <div class="form-group" id="group-phone">
+            <label for="phone">Phone</label>
+            <input type="text" id="phone" name="phone" />
+            <div class="error-message" data-error-for="phone"></div>
+        </div>
+
+        <!-- Message (required) -->
+        <div class="form-group" id="group-message">
+            <label for="message">Message *</label>
+            <textarea id="message" name="message" rows="4"></textarea>
+            <div class="error-message" data-error-for="message"></div>
+        </div>
+
+        <!-- Terms checkbox (required) -->
+        <div class="form-group" id="group-terms">
+            <div class="checkbox-group">
+                <input type="checkbox" id="terms" name="terms" />
+                <label for="terms">I agree with terms *</label>
+            </div>
+            <div class="error-message" data-error-for="terms"></div>
+        </div>
+
+        <!-- Submit button (id="submit") -->
+        <button type="submit" id="submit">Send</button>
+    </form>
+
+    <script>
+        const form = document.getElementById('contact-form');
+        const successAlert = document.querySelector('.alert-success');
+
+        function setError(fieldId, message) {
+            const errorElement = document.querySelector(`[data-error-for="${fieldId}"]`);
+            const groupElement = document.getElementById('group-' + fieldId);
+            if (errorElement) {
+                errorElement.textContent = message || '';
+            }
+            if (groupElement) {
+                if (message) {
+                    groupElement.classList.add('has-error');
+                } else {
+                    groupElement.classList.remove('has-error');
+                }
+            }
+        }
+
+        function clearAllErrors() {
+            const errorElements = document.querySelectorAll('.error-message');
+            errorElements.forEach(el => el.textContent = '');
+            const groups = document.querySelectorAll('.form-group');
+            groups.forEach(g => g.classList.remove('has-error'));
+        }
+
+        function validateEmail(email) {
+            // простой, неидеальный regex, достаточно для учебного примера
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(String(email).toLowerCase());
+        }
+
+        form.addEventListener('submit', function (event) {
+            event.preventDefault(); // не отправляем на сервер (для примера)
+            clearAllErrors();
+            successAlert.style.display = 'none';
+
+            const fullName = document.getElementById('full_name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const message = document.getElementById('message').value.trim();
+            const termsChecked = document.getElementById('terms').checked;
+
+            let isValid = true;
+
+            // Валидация Full Name
+            if (!fullName) {
+                setError('full_name', 'Full Name is required');
+                isValid = false;
+            }
+
+            // Валидация Email
+            if (!email) {
+                setError('email', 'Email is required');
+                isValid = false;
+            } else if (!validateEmail(email)) {
+                setError('email', 'Email format is invalid');
+                isValid = false;
+            }
+
+            // Phone можно делать необязательным, но при желании — проверить формат
+            if (phone && phone.length < 5) {
+                setError('phone', 'Phone number is too short');
+                isValid = false;
+            }
+
+            // Валидация Message
+            if (!message) {
+                setError('message', 'Message is required');
+                isValid = false;
+            }
+
+            // Валидация Terms
+            if (!termsChecked) {
+                setError('terms', 'You must agree with terms');
+                isValid = false;
+            }
+
+            // Если всё ок — считаем, что форма "успешно отправлена"
+            if (isValid) {
+                successAlert.style.display = 'block';
+                // имитация отправки: можно очистить форму
+                form.reset();
+            }
+        });
+    </script>
+
+</body>
+</html>
